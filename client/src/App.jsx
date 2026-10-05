@@ -1,22 +1,79 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTodos } from './hooks/useTodos';
+import { TodoForm } from './components/TodoForm';
+import { TodoList } from './components/TodoList';
+import { TodoEditModal } from './components/TodoEditModal';
+import { CheckSquare } from 'lucide-react';
 
 function App() {
-  const { todos, isLoading, error } = useTodos();
+  const {
+    todos,
+    isLoading,
+    error,
+    addTodo,
+    toggleTodoDone,
+    removeTodo,
+    editTodo,
+  } = useTodos();
+
+  const [editingTodo, setEditingTodo] = useState(null);
+
+  const completedCount = todos.filter((t) => t.done).length;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12">
-      <header className="mb-8 text-center">
-        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Task Manager</h1>
-        <p className="text-slate-500 mt-2 text-sm">Full-Stack TODO with Optimistic UI</p>
-      </header>
-      
-      {isLoading && <p className="text-center text-slate-500">Loading tasks...</p>}
-      {error && <div className="p-4 mb-4 bg-red-50 text-red-700 rounded-lg text-sm">{error}</div>}
-      
-      <div className="text-sm text-slate-400 text-center">
-        State initialized. Total items: {todos.length}
-      </div>
+    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6">
+      <main className="max-w-2xl mx-auto">
+        <header className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2.5 bg-indigo-600 text-white rounded-xl shadow-xs">
+              <CheckSquare size={24} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-black text-slate-900 tracking-tight">TaskFlow</h1>
+              <p className="text-xs text-slate-500 font-medium">Spec-Driven Full-Stack TODO</p>
+            </div>
+          </div>
+
+          {todos.length > 0 && (
+            <div className="flex items-center justify-between mt-4 py-2.5 px-4 bg-white border border-slate-200/80 rounded-xl text-xs font-medium text-slate-500">
+              <span>{completedCount} of {todos.length} tasks completed</span>
+              <span className="font-mono text-indigo-600 font-semibold">
+                {Math.round((completedCount / todos.length) * 100)}%
+              </span>
+            </div>
+          )}
+        </header>
+
+        {error && (
+          <div className="p-4 mb-6 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl">
+            {error}
+          </div>
+        )}
+
+        <TodoForm onAdd={addTodo} />
+
+        {isLoading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="h-16 bg-white border border-slate-200 rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <TodoList
+            todos={todos}
+            onToggle={toggleTodoDone}
+            onEdit={(todo) => setEditingTodo(todo)}
+            onDelete={removeTodo}
+          />
+        )}
+
+        <TodoEditModal
+          isOpen={Boolean(editingTodo)}
+          todo={editingTodo}
+          onClose={() => setEditingTodo(null)}
+          onSave={editTodo}
+        />
+      </main>
     </div>
   );
 }
