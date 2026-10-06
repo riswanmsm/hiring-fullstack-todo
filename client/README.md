@@ -1,16 +1,25 @@
-# React + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+# Client - Full-Stack TODO Frontend
+A modern, responsive task management interface built with **React 19**, **Vite**, and **Tailwind CSS v4**, featuring Spec-Driven API integration and optimistic UI updates.
+---
+## Architectural Highlights
+- **Custom State Management (`useTodos` Hook):** All data fetching, state mutations, and API orchestration are cleanly decoupled from the UI layer into a dedicated custom hook (`src/hooks/useTodos.js`).
+- **Optimistic UI with Snapshot Rollback:** Status toggling (`PATCH /api/todos/:id/done`) and deletions (`DELETE /api/todos/:id`) mutate state instantaneously. If the network request fails, state automatically reverts to a previous snapshot while triggering an error notification.
+- **Defensive Error Handling:** Form-level validation prevents empty submissions, graceful skeleton loaders handle initial data retrieval, and an auto-dismissing toast alerts users to backend communication failures.
+- **Tailwind CSS v4 & Lucide Icons:** Modern design system configured with `@tailwindcss/vite` and clean iconography.
+---
+## Component Architecture
+```text
+src/
+├── components/
+│   ├── TodoForm.jsx        # Task creation with client-side validation
+│   ├── TodoList.jsx        # Empty state & item list rendering
+│   ├── TodoItem.jsx        # Individual task with optimistic toggle & actions
+│   ├── TodoEditModal.jsx   # Dialog modal for updating title & description
+│   └── Toast.jsx           # Auto-dismissing error toast notification
+├── hooks/
+│   └── useTodos.js         # Centralized state & optimistic rollback logic
+├── services/
+│   └── todoApi.js          # Axios API client matching backend contract
+├── App.jsx                 # Layout orchestration & progress metrics
+├── index.css               # Tailwind CSS v4 entrypoint
+└── main.jsx                # Application root entry

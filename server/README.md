@@ -17,7 +17,7 @@ Follows a strict layered architecture:
 - Node.js >= 20.x
 - MongoDB instance (or local connection string via `.env`)
 
-### Installation & Run
+### Installation & Run (while inside server directory run the below commands)
 ```bash
 # Install dependencies
 npm install
@@ -30,3 +30,16 @@ npm start
 
 # Run automated test suite (in-memory MongoDB)
 npm test
+```
+
+## API Endpoints Reference
+
+All endpoints conform 1:1 to the contract specification defined in `docs/api-spec.md`.
+
+| Method | Endpoint | Description | Status Codes |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/todos` | Retrieve all TODOs sorted by `createdAt` descending | `200 OK` |
+| `POST` | `/api/todos` | Create a new TODO item (requires valid `title`) | `201 Created`, `400 Bad Request` |
+| `PUT` | `/api/todos/:id` | Update title and/or description | `200 OK`, `400 Bad Request`, `404 Not Found` |
+| `PATCH` | `/api/todos/:id/done` | Toggle boolean completion status | `200 OK`, `404 Not Found` |
+| `DELETE` | `/api/todos/:id` | Delete a TODO item | `200 OK`, `404 Not Found` |

@@ -3,6 +3,7 @@ import { useTodos } from './hooks/useTodos';
 import { TodoForm } from './components/TodoForm';
 import { TodoList } from './components/TodoList';
 import { TodoEditModal } from './components/TodoEditModal';
+import { Toast } from './components/Toast';
 import { CheckSquare } from 'lucide-react';
 
 function App() {
@@ -10,6 +11,7 @@ function App() {
     todos,
     isLoading,
     error,
+    clearError,
     addTodo,
     toggleTodoDone,
     removeTodo,
@@ -44,11 +46,7 @@ function App() {
           )}
         </header>
 
-        {error && (
-          <div className="p-4 mb-6 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl">
-            {error}
-          </div>
-        )}
+        <Toast message={error} onClose={clearError} />
 
         <TodoForm onAdd={addTodo} />
 
