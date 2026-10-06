@@ -62,7 +62,7 @@ export const TodoItem = ({ todo, onToggle, onEdit, onDelete }) => {
         </button>
         <button
           type="button"
-          onClick={() => onDelete(todo._id)}
+          onClick={() => onDelete(todo)}
           aria-label="Delete task"
           className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors cursor-pointer focus:outline-none"
         >

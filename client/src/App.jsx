@@ -3,6 +3,7 @@ import { useTodos } from './hooks/useTodos';
 import { TodoForm } from './components/TodoForm';
 import { TodoList } from './components/TodoList';
 import { TodoEditModal } from './components/TodoEditModal';
+import { DeleteConfirmModal } from './components/DeleteConfirmModal';
 import { Toast } from './components/Toast';
 import { CheckSquare } from 'lucide-react';
 
@@ -19,6 +20,7 @@ function App() {
   } = useTodos();
 
   const [editingTodo, setEditingTodo] = useState(null);
+  const [deletingTodo, setDeletingTodo] = useState(null);
 
   const completedCount = todos.filter((t) => t.done).length;
 
@@ -61,7 +63,7 @@ function App() {
             todos={todos}
             onToggle={toggleTodoDone}
             onEdit={(todo) => setEditingTodo(todo)}
-            onDelete={removeTodo}
+            onDelete={(todo) => setDeletingTodo(todo)}
           />
         )}
 
@@ -70,6 +72,13 @@ function App() {
           todo={editingTodo}
           onClose={() => setEditingTodo(null)}
           onSave={editTodo}
+        />
+
+        <DeleteConfirmModal
+          isOpen={Boolean(deletingTodo)}
+          todo={deletingTodo}
+          onClose={() => setDeletingTodo(null)}
+          onConfirm={removeTodo}
         />
       </main>
     </div>
