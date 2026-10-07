@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Loader2, AlertCircle } from 'lucide-react';
 
 export const TodoEditModal = ({ isOpen, todo, onClose, onSave }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [validationError, setValidationError] = useState('');
+  const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -12,6 +13,7 @@ export const TodoEditModal = ({ isOpen, todo, onClose, onSave }) => {
       setTitle(todo.title || '');
       setDescription(todo.description || '');
       setValidationError('');
+      setSubmitError('');
     }
   }, [todo]);
 
@@ -24,6 +26,8 @@ export const TodoEditModal = ({ isOpen, todo, onClose, onSave }) => {
       return;
     }
 
+    setValidationError('');
+    setSubmitError('');
     setIsSubmitting(true);
     const result = await onSave(todo._id, {
       title: title.trim(),
@@ -33,6 +37,8 @@ export const TodoEditModal = ({ isOpen, todo, onClose, onSave }) => {
 
     if (result.success) {
       onClose();
+    } else if (result.error) {
+      setSubmitError(result.error);
     }
   };
 
@@ -76,25 +82,44 @@ export const TodoEditModal = ({ isOpen, todo, onClose, onSave }) => {
             <textarea
               rows="3"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none"
+              disabled={isSubmitting}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                if (submitError) setSubmitError('');
+              }}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none disabled:bg-slate-50 disabled:text-slate-500"
             />
           </div>
+
+          {submitError && (
+            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-lg flex items-start gap-2.5 animate-in fade-in duration-150">
+              <AlertCircle size={16} className="shrink-0 text-rose-500 mt-0.5" />
+              <span className="font-medium">{submitError}</span>
+            </div>
+          )}
 
           <div className="flex justify-end gap-2 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer"
+              disabled={isSubmitting}
+              className="px-3.5 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm disabled:opacity-50 cursor-pointer"
             >
-              {isSubmitting ? 'Saving...' : 'Save Changes'}
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={15} className="animate-spin" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                'Save Changes'
+              )}
             </button>
           </div>
         </form>

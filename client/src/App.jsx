@@ -5,12 +5,14 @@ import { TodoList } from './components/TodoList';
 import { TodoEditModal } from './components/TodoEditModal';
 import { DeleteConfirmModal } from './components/DeleteConfirmModal';
 import { Toast } from './components/Toast';
+import { GlobalLoader } from './components/GlobalLoader';
 import { CheckSquare } from 'lucide-react';
 
 function App() {
   const {
     todos,
     isLoading,
+    isMutating,
     error,
     clearError,
     addTodo,
@@ -26,6 +28,11 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6">
+      <GlobalLoader
+        active={isLoading || isMutating}
+        label={isLoading ? 'Connecting to server...' : 'Processing request...'}
+        subtext={isLoading ? 'Please wait while tasks are loading...' : 'Saving changes to database...'}
+      />
       <main className="max-w-2xl mx-auto">
         <header className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -50,7 +57,7 @@ function App() {
 
         <Toast message={error} onClose={clearError} />
 
-        <TodoForm onAdd={addTodo} />
+        <TodoForm onAdd={addTodo} disabled={isLoading} />
 
         {isLoading ? (
           <div className="space-y-3">

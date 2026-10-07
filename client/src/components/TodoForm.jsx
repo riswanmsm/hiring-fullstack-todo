@@ -1,20 +1,25 @@
 import { useState } from 'react';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Loader2, AlertCircle } from 'lucide-react';
 
-export const TodoForm = ({ onAdd }) => {
+export const TodoForm = ({ onAdd, disabled = false }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [validationError, setValidationError] = useState('');
+  const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isBusy = isSubmitting || disabled;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isBusy) return;
     if (!title.trim()) {
       setValidationError('Task title cannot be empty.');
       return;
     }
 
     setValidationError('');
+    setSubmitError('');
     setIsSubmitting(true);
 
     const result = await onAdd({
@@ -27,6 +32,9 @@ export const TodoForm = ({ onAdd }) => {
     if (result.success) {
       setTitle('');
       setDescription('');
+      setSubmitError('');
+    } else if (result.error) {
+      setSubmitError(result.error);
     }
   };
 
@@ -44,15 +52,17 @@ export const TodoForm = ({ onAdd }) => {
             id="todo-title"
             type="text"
             value={title}
+            disabled={isBusy}
             onChange={(e) => {
               setTitle(e.target.value);
               if (validationError) setValidationError('');
+              if (submitError) setSubmitError('');
             }}
             placeholder="What needs to be done?"
-            className={`w-full px-3.5 py-2.5 rounded-lg border text-sm text-slate-800 focus:outline-none focus:ring-2 transition-all ${
+            className={`w-full px-3.5 py-2.5 rounded-lg border text-sm text-slate-800 focus:outline-none focus:ring-2 transition-all disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed ${
               validationError
-                ? 'border-red-400 focus:ring-red-200'
-                : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-100'
+                 ? 'border-red-400 focus:ring-red-200'
+                 : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-100'
             }`}
           />
           {validationError && (
@@ -68,20 +78,40 @@ export const TodoForm = ({ onAdd }) => {
             id="todo-desc"
             rows="2"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            disabled={isBusy}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              if (submitError) setSubmitError('');
+            }}
             placeholder="Add context, specifications, or notes..."
-            className="w-full px-3.5 py-2 rounded-lg border border-slate-300 text-sm text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all resize-none"
+            className="w-full px-3.5 py-2 rounded-lg border border-slate-300 text-sm text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all resize-none disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed"
           />
         </div>
+
+        {submitError && (
+          <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-lg flex items-start gap-2.5 animate-in fade-in duration-150">
+            <AlertCircle size={16} className="shrink-0 text-rose-500 mt-0.5" />
+            <span className="font-medium">{submitError}</span>
+          </div>
+        )}
 
         <div className="flex justify-end">
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors cursor-pointer"
+            disabled={isBusy}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-sm font-semibold rounded-lg shadow-sm transition-all cursor-pointer"
           >
-            <PlusCircle size={16} />
-            {isSubmitting ? 'Adding...' : 'Add Task'}
+            {isSubmitting ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                <span>Adding task...</span>
+              </>
+            ) : (
+              <>
+                <PlusCircle size={16} />
+                <span>Add Task</span>
+              </>
+            )}
           </button>
         </div>
       </div>

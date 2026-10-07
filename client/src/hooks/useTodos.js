@@ -1,9 +1,23 @@
 import { useState, useEffect, useCallback } from 'react';
 import * as api from '../services/todoApi';
 
+const getErrorMessage = (err, fallback = 'Something went wrong. Please try again.') => {
+  if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+    return 'Connection timed out. Please check your network connection and try again.';
+  }
+  if (err.response?.data?.error) {
+    return err.response.data.error;
+  }
+  if (err.request && !err.response) {
+    return 'Unable to connect to the server. Please check your internet connection and try again.';
+  }
+  return fallback;
+};
+
 export const useTodos = () => {
   const [todos, setTodos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMutating, setIsMutating] = useState(false);
   const [error, setError] = useState(null);
 
   // Initial fetch
@@ -14,7 +28,7 @@ export const useTodos = () => {
       const data = await api.getTodos();
       setTodos(data);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to fetch TODOs from server');
+      setError(getErrorMessage(err, 'Unable to load tasks. Please try again.'));
     } finally {
       setIsLoading(false);
     }
@@ -27,15 +41,18 @@ export const useTodos = () => {
   // Create TODO
   const addTodo = async ({ title, description }) => {
     setError(null);
+    setIsMutating(true);
     try {
       const newTodo = await api.createTodo({ title, description });
       // Prepend newly created item to maintain createdAt desc order
       setTodos((prev) => [newTodo, ...prev]);
       return { success: true };
     } catch (err) {
-      const message = err.response?.data?.error || 'Failed to create TODO';
+      const message = getErrorMessage(err, 'Unable to create task. Please try again.');
       setError(message);
       return { success: false, error: message };
+    } finally {
+      setIsMutating(false);
     }
   };
 
@@ -53,6 +70,7 @@ export const useTodos = () => {
     );
 
     // 3. Dispatch network request
+    setIsMutating(true);
     try {
       const updatedTodo = await api.toggleDoneStatus(id);
       // Re-sync with exact server response (updates updatedAt)
@@ -62,7 +80,9 @@ export const useTodos = () => {
     } catch (err) {
       // 4. Rollback to prior snapshot on failure
       setTodos(previousTodos);
-      setError(err.response?.data?.error || 'Failed to update status. Reverting changes.');
+      setError(getErrorMessage(err, 'Unable to update task. Reverting changes.'));
+    } finally {
+      setIsMutating(false);
     }
   };
 
@@ -73,19 +93,23 @@ export const useTodos = () => {
 
     // Optimistically remove from state
     setTodos((prev) => prev.filter((todo) => todo._id !== id));
+    setIsMutating(true);
 
     try {
       await api.deleteTodo(id);
     } catch (err) {
       // Rollback on failure
       setTodos(previousTodos);
-      setError(err.response?.data?.error || 'Failed to delete TODO. Reverting changes.');
+      setError(getErrorMessage(err, 'Unable to delete task. Reverting changes.'));
+    } finally {
+      setIsMutating(false);
     }
   };
 
   // Update TODO (PUT /api/todos/:id)
   const editTodo = async (id, { title, description }) => {
     setError(null);
+    setIsMutating(true);
     try {
       const updatedTodo = await api.updateTodo(id, { title, description });
       setTodos((prev) =>
@@ -93,9 +117,11 @@ export const useTodos = () => {
       );
       return { success: true };
     } catch (err) {
-      const message = err.response?.data?.error || 'Failed to update TODO';
+      const message = getErrorMessage(err, 'Unable to save changes. Please try again.');
       setError(message);
       return { success: false, error: message };
+    } finally {
+      setIsMutating(false);
     }
   };
 
@@ -104,6 +130,7 @@ export const useTodos = () => {
   return {
     todos,
     isLoading,
+    isMutating,
     error,
     clearError,
     addTodo,
