@@ -2,6 +2,13 @@
 
 A production-ready full-stack task management platform built strictly against the provided REST API specifications and Mongoose schema contracts.
 
+## Video Walkthrough & Live Demo
+- 📺 **YouTube Video Walkthrough:** [https://youtu.be/HEO0IK3XMLU](https://youtu.be/HEO0IK3XMLU)
+  - **Live UI Demo:** Task creation, in-place editing modal, optimistic completion toggle, delete confirmation dialog.
+  - **Error & Resilience Handling:** Full-page interaction-blocking loader, network timeout resilience, user-friendly error feedback.
+  - **Codebase Walkthrough:** End-to-end layered architecture (`server.js` &rarr; `app.js` &rarr; `routes` &rarr; `validators` &rarr; `controllers` &rarr; `services` &rarr; `models`).
+  - **Automated Tests:** 11/11 Jest integration tests passing against in-memory MongoDB.
+
 ## Architecture & Engineering Rationale
 - **Spec-Driven Development (SDD):** Endpoints and data models adhere 1:1 with specifications (`GET`, `POST`, `PUT`, `PATCH /done`, `DELETE`).
 - **Test-Driven Development (TDD):** Automated integration tests written with Jest, Supertest, and an in-memory MongoDB runner to validate behavior and edge cases without third-party database dependencies.
